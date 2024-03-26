@@ -1,43 +1,37 @@
 package dota.pos5.movies.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import dota.pos5.movies.validation.DateForFilms;
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import dota.pos5.movies.DateForFilms;
 
-
-import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "films")
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class Film {
 
-    @PositiveOrZero
-    private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    @NotBlank(message = "Не правильное название фильма")
     private String name;
 
-    @NotNull(message = "Отсутствует описание фильма")
-    @Size(max = 200, message = "слишком длинное описание, больше 200 символов")
     private String description;
 
-    @NotNull(message = "Отсутствует дата релиза фильма фильма")
-    @DateForFilms
     private LocalDate releaseDate;
 
-    @Min(value = 1, message = "Неправильная продолжительность фильма")
     private int duration;
 
-    private Mpa mpa = new Mpa();
+    @ManyToOne
+    private User user;
 
-    private List<Genre> genres = new ArrayList<>();
-
-    private List<Integer> likes = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+            name = "film_genre",
+            joinColumns = @JoinColumn(name = "film_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private List<Genre> genres;
 }

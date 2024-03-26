@@ -1,61 +1,48 @@
 package dota.pos5.movies.controllers;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import dota.pos5.movies.payload.filmdto.FilmRequest;
+import dota.pos5.movies.services.FilmService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import dota.pos5.movies.entities.Film;
-import dota.pos5.movies.services.FilmService;
 
-import javax.validation.Valid;
 import java.util.Map;
 
-@Slf4j
 @RestController
-@RequiredArgsConstructor
-@RequestMapping("/films")
+@RequestMapping("/api/v1/films")
 public class FilmController {
 
     private final FilmService filmService;
 
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
+
     @PostMapping
-    public ResponseEntity<?> createFilm(@RequestBody @Valid Film film) {
-        filmService.create(film);
-        return new ResponseEntity<>(film, HttpStatus.CREATED);
+    public ResponseEntity<?> createFilm(@RequestBody @Valid FilmRequest filmRequest) {
+        return new ResponseEntity<>(filmService.create(filmRequest), HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public  ResponseEntity<?> updateFilm(@Valid @RequestBody Film film) {
-        filmService.update(film);
-        return new ResponseEntity<>(film, HttpStatus.OK);
+    @PutMapping("{filmId}")
+    public  ResponseEntity<?> updateFilm(@PathVariable Long filmId,  @Valid @RequestBody FilmRequest filmRequest) {
+        return new ResponseEntity<>(filmService.update(filmId, filmRequest), HttpStatus.OK);
     }
 
-    @GetMapping()
-    public ResponseEntity<?> getFilms() {
-        return new ResponseEntity<>(filmService.getFilms(), HttpStatus.OK);
+    @GetMapping("{userId}")
+    public ResponseEntity<?> getFilms(@PathVariable Long userId) {
+        return new ResponseEntity<>(filmService.getAll(userId), HttpStatus.OK);
     }
 
     @GetMapping("/{filmId}")
-    public ResponseEntity<?> getFilm(@PathVariable Integer filmId) {
-        return new ResponseEntity<>(filmService.getFilm(filmId), HttpStatus.OK);
+    public ResponseEntity<?> getFilm(@PathVariable Long filmId) {
+        return new ResponseEntity<>(filmService.get(filmId), HttpStatus.OK);
     }
 
-    @PutMapping("/{filmId}/like/{userId}")
-    public ResponseEntity<?> addLike(@PathVariable Integer filmId, @PathVariable Integer userId) {
-        filmService.addLike(filmId, userId);
-        return new ResponseEntity<>("Лайк добавлен", HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{filmId}/like/{userId}")
-    public ResponseEntity<?> deleteLike(@PathVariable Integer filmId, @PathVariable Integer userId) {
-        filmService.deleteLike(filmId, userId);
-        return new ResponseEntity<>("Лайк удалён", HttpStatus.OK);
-    }
-
-    @GetMapping("/popular")
-    public ResponseEntity<?> getTopFilms(@RequestParam(defaultValue = "10") int count) {
-        return new ResponseEntity<>(filmService.getMostPopularFilms(count), HttpStatus.OK);
+    @DeleteMapping("/{filmId}")
+    public ResponseEntity<?> delete(@PathVariable Long filmId) {
+        filmService.delete(filmId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ExceptionHandler()

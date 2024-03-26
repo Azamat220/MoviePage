@@ -1,72 +1,42 @@
-package ru.yandex.practicum.javafilmorate.controllers;
+package dota.pos5.movies.controllers;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import dota.pos5.movies.payload.userdto.UserRequestDTO;
+import dota.pos5.movies.payload.userdto.UserResponseDTO;
+import dota.pos5.movies.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import dota.pos5.movies.entities.User;
-import dota.pos5.movies.services.UserService;
 
-import javax.validation.Valid;
-import java.util.Map;
+import java.util.List;
 
-@Slf4j
 @RestController
-@RequiredArgsConstructor
-@RequestMapping(value = "/users", produces = "application/json")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody User user) {
-        userService.create(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody User user) {
-        userService.update(user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequestDTO) {
+        return new ResponseEntity<>(userService.create(userRequestDTO), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userRequestDTO) {
+        return new ResponseEntity<>(userService.update(id, userRequestDTO), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.get(id), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<?> getUsers() {
-        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
-    }
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable Integer userId) {
-        return new ResponseEntity<>(userService.getUser(userId), HttpStatus.OK);
-    }
-
-    @PutMapping("/{userId}/friends/{friendId}")
-    public ResponseEntity<?> addFriend(@PathVariable Integer userId, @PathVariable Integer friendId) {
-        userService.addFriend(userId, friendId);
-        return new ResponseEntity<>("Пользователь успешно добавлен в друзья", HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{userId}/friends/{friendId}")
-    public ResponseEntity<?> deleteFriend(@PathVariable Integer userId, @PathVariable Integer friendId) {
-        userService.removeFriend(userId, friendId);
-        return new ResponseEntity<>("Пользователь успешно удалён из списка друзей", HttpStatus.OK);
-    }
-
-    @GetMapping("/{userId}/friends")
-    public ResponseEntity<?> getUsersFriends(@PathVariable Integer userId) {
-        return new ResponseEntity<>(userService.getUserFriends(userId), HttpStatus.OK);
-    }
-
-    @GetMapping("/{userId}/friends/common/{otherId}")
-    public ResponseEntity<?> getCommonFriends(@PathVariable Integer userId, @PathVariable Integer otherId) {
-        return new ResponseEntity<>(userService.getCommonFriends(userId, otherId), HttpStatus.OK);
-    }
-
-    @ExceptionHandler()
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleNotFoundException(final IllegalStateException e) {
-        return Map.of("Error", e.getMessage());
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return new ResponseEntity<>(userService.getAll(), HttpStatus.OK);
     }
 
 }

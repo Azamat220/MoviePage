@@ -1,7 +1,8 @@
 package dota.pos5.movies.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
 import java.time.LocalDate;
 
 public class DateForFilmsValid implements ConstraintValidator<DateForFilms, LocalDate> {
